@@ -21,6 +21,7 @@ class IntroductionSlider extends StatefulWidget {
 
   /// The [Done] that is used to navigate to the target page.
   final Done done;
+  final VoidCallback onPressedDone;
 
   /// The [DotIndicator] that is used to indicate dots.
   final DotIndicator? dotIndicator;
@@ -43,10 +44,10 @@ class IntroductionSlider extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.back,
     required this.done,
+    required this.onPressedDone,
     this.next,
     this.dotIndicator,
-  })  : assert((initialPage <= items.length - 1) && (initialPage >= 0),
-            "initialPage can't be less than 0 or greater than items length."),
+  })  : assert((initialPage <= items.length - 1) && (initialPage >= 0), "initialPage can't be less than 0 or greater than items length."),
         super(key: key);
 
   @override
@@ -101,8 +102,7 @@ class _IntroductionSliderState extends State<IntroductionSlider> {
             itemCount: widget.items.length,
             physics: widget.physics,
             scrollDirection: widget.scrollDirection,
-            onPageChanged: (index) =>
-                setState(() => widget.initialPage = index),
+            onPageChanged: (index) => setState(() => widget.initialPage = index),
             itemBuilder: (context, index) {
               return Container(
                 decoration: BoxDecoration(
@@ -140,14 +140,10 @@ class _IntroductionSliderState extends State<IntroductionSlider> {
                             borderRadius: BorderRadius.circular(25),
                             color: index == widget.initialPage
                                 ? widget.dotIndicator?.selectedColor
-                                : widget.dotIndicator?.unselectedColor ??
-                                    widget.dotIndicator?.selectedColor
-                                        ?.withOpacity(0.5),
+                                : widget.dotIndicator?.unselectedColor ?? widget.dotIndicator?.selectedColor?.withOpacity(0.5),
                           ),
                           height: widget.dotIndicator?.size,
-                          width: index == widget.initialPage
-                              ? widget.dotIndicator!.size! * 2.5
-                              : widget.dotIndicator!.size,
+                          width: index == widget.initialPage ? widget.dotIndicator!.size! * 2.5 : widget.dotIndicator!.size,
                           duration: const Duration(milliseconds: 350),
                         ),
                       ),
@@ -173,35 +169,7 @@ class _IntroductionSliderState extends State<IntroductionSlider> {
                         ),
                   lastIndex
                       ? TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              PageRouteBuilder(
-                                transitionDuration:
-                                    widget.done.animationDuration!,
-                                transitionsBuilder: (context, animation,
-                                    secondAnimation, child) {
-                                  animation = CurvedAnimation(
-                                    parent: animation,
-                                    curve: widget.done.curve!,
-                                  );
-                                  return SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: widget.scrollDirection ==
-                                              Axis.vertical
-                                          ? const Offset(0, 1.0)
-                                          : const Offset(1.0, 0.0),
-                                      end: Offset.zero,
-                                    ).animate(animation),
-                                    child: child,
-                                  );
-                                },
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) {
-                                  return widget.done.home!;
-                                },
-                              ),
-                            );
-                          },
+                          onPressed: widget.onPressedDone,
                           style: widget.done.style,
                           child: widget.done.child,
                         )
